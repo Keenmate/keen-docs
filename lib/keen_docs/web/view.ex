@@ -95,11 +95,11 @@ defmodule KeenDocs.Web.View do
           </div>
         </div>
     #{footer}  </div>
-      <script>#{layout_js()}</script>
       <script src="/vendor/pure-css/pure-css.js"></script>
       <script src="/vendor/pure-css/fit.js"></script>
       <script src="/vendor/pure-css/navbar-dropdown.js"></script>
       <script src="/vendor/pure-css/sidebar-resize.js"></script>
+      <script>#{layout_js()}</script>
       <script src="/keendocs/settings-panel.js"></script>
       <script>window.pureCss&&pureCss.components&&pureCss.components.initAll(document);</script>
     #{opts[:footer] || ""}</body>
@@ -264,15 +264,24 @@ defmodule KeenDocs.Web.View do
   defp version_control_head(_), do: ""
 
   # Progressive-enhancement JS over the pure-css navbar shell: the burger toggles a
-  # `body.sidebar-visible` overlay on mobile, and a single `resize` listener normalizes that
-  # state whenever the viewport crosses the 768px breakpoint back to desktop (so an open mobile
-  # overlay never sticks when widened). Backdrop tap (click on the bare body) closes it.
+  # `body.sidebar-visible` overlay on mobile, and crossing the mobile breakpoint back to desktop
+  # normalizes that state (so an open mobile overlay never sticks when widened). Backdrop tap
+  # (click on the bare body) closes it.
+  #
+  # The resize signal comes from `pureCss.viewport` via the `viewport:resize` topic — pure-css owns
+  # the single throttled resize source, so this must never add a second `window.resize` listener.
+  # The breakpoint is read from `pureCss.config.mobileBreakpoint` (itself single-sourced from the
+  # `--pc-mobile-breakpoint` CSS var) rather than re-typed as a JS literal. This script is emitted
+  # AFTER pure-css.js so `window.pureCss` is already installed; the raw-listener branch is only a
+  # no-pure-css safety net (where there is no second listener to conflict with).
   defp layout_js do
     "function kdToggleSidebar(){var b=document.body,x=document.querySelector('.burger-menu');" <>
       "b.classList.toggle('sidebar-visible');if(x)x.classList.toggle('active');}" <>
-      "function kdSyncLayout(){if(window.innerWidth>768){document.body.classList.remove('sidebar-visible');" <>
+      "function kdSyncLayout(){var bp=(window.pureCss&&pureCss.config&&pureCss.config.mobileBreakpoint)||768;" <>
+      "if(window.innerWidth>bp){document.body.classList.remove('sidebar-visible');" <>
       "var x=document.querySelector('.burger-menu');if(x)x.classList.remove('active');}}" <>
-      "window.addEventListener('resize',kdSyncLayout);" <>
+      "if(window.pureCss&&pureCss.events)pureCss.events.on('viewport:resize',kdSyncLayout);" <>
+      "else window.addEventListener('resize',kdSyncLayout);" <>
       "document.body.addEventListener('click',function(e){if(document.body.classList.contains('sidebar-visible')&&e.target===document.body)kdToggleSidebar();});" <>
       version_control_js() <>
       profile_js()

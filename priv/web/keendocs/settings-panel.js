@@ -88,6 +88,24 @@
     // ── appearance (light / dark / auto) ──────────────────────────────────────
     // Shares the `kd-mode` key + `pc-mode-dark` class with the header toggle button and the
     // pre-paint head script. Restored pre-paint; here we only reflect + apply on change.
+    // `auto` means "follow the OS, live". pureCss.colorScheme is the single owner of the
+    // prefers-color-scheme watcher — read it rather than opening a second matchMedia here.
+    function osPrefersDark() {
+      return window.pureCss && pureCss.colorScheme
+        ? pureCss.colorScheme.mode === 'dark'
+        : matchMedia('(prefers-color-scheme:dark)').matches;
+    }
+    function applyAutoMode() {
+      html.classList.toggle('pc-mode-dark', osPrefersDark());
+    }
+    // Re-apply whenever the OS flips, but only while no explicit choice is stored — a stored
+    // light/dark must survive an OS change.
+    if (window.pureCss && pureCss.events) {
+      pureCss.events.on('colorscheme:change', function () {
+        if (!get('kd-mode')) applyAutoMode();
+      });
+    }
+
     if (modeSel) {
       modeSel.value = get('kd-mode') || 'auto';
       modeSel.addEventListener('change', function () {
@@ -100,7 +118,7 @@
           store('kd-mode', 'light');
         } else {
           drop('kd-mode');
-          html.classList.toggle('pc-mode-dark', matchMedia('(prefers-color-scheme:dark)').matches);
+          applyAutoMode();
         }
       });
     }

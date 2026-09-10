@@ -128,6 +128,56 @@ Persistence is **stored SQL functions + raw Postgrex + code generation — no Ec
   division (azure/aws) for infrastructure, a hidden `main` for guides. Don't reintroduce a component-only
   "version"/"package" vocabulary.
 
+## Front-end runtime — `window.pureCss`
+
+keen-docs is a **pure-css-only** consumer (no pure-admin dependency). The app shell *and* its JS
+runtime live in `@keenmate/pure-css` (rc05+), vendored to `priv/web/vendor/pure-css/` by
+`make vendor-css` (local sibling) or `make vendor-css-npm` (the pinned `PURE_CSS_VERSION`).
+
+**pure-css owns the foundation runtime; keen-docs does not wrap it.** `window.pureCss` provides the
+event bus, `viewport` (the single throttled resize source), `colorScheme` (the single
+`prefers-color-scheme` watcher), `device`, `overlay`, `menus`, `config`, `debug`, and the
+`components` registry with the shell engines (fit, navbar-dropdown, sidebar-resize,
+container-breakpoint).
+
+Note the contrast with the *other* consumer: `pure-admin` repacks the same runtime behind
+`window.pureAdmin` as an **adopt-and-extend facade** (buses adopted by reference,
+`components = Object.create(pureCss.components)` for read-through) because it layers its own
+components — toast, tooltips, splitter, overflow — on top. **keen-docs deliberately has no such
+facade**: it ships no components of its own, so the indirection would buy nothing. Call sites name
+`window.pureCss` directly, guarded. Don't introduce a `window.keenDocs` namespace without a
+concrete set of keen-docs-owned components to justify it.
+
+### Invariants
+
+- **Never re-create what pure-css owns.** Before writing a listener or a watcher, check
+  `priv/web/vendor/pure-css/pure-css.js` for an existing owner.
+- **Never add a second `window.resize` listener** — subscribe to `viewport:resize`. An *element*
+  box still needs its own `ResizeObserver`.
+- **Never open a second `prefers-color-scheme` matchMedia** — read `pureCss.colorScheme.mode` and
+  subscribe to `colorscheme:change`. A one-shot read is the subtler version of this bug: "auto"
+  mode must keep following the OS, not sample it once.
+- **One owner per preference** (mode / font-size / font-family / sidebar). Controls call the owner's
+  API; they never toggle the class or touch `localStorage` themselves. pure-css exposes **no**
+  storage module, so the `kd-*` `localStorage` helpers in `settings-panel.js` are legitimately
+  keen-docs' own — that is not duplication.
+- **Single-source rule:** a value that also exists as a CSS token is read from the token, never
+  re-typed as a JS literal — the mobile breakpoint comes from `pureCss.config.mobileBreakpoint`
+  (itself read from `--pc-mobile-breakpoint`), not a bare `768`. The exception is a CSS `@media`
+  query, which cannot read a custom property.
+- **Don't conflate `config.mobileBreakpoint` with `device.class`.** The first is a layout *width*
+  (sidebar → overlay); the second is *what kind of machine this is* (a narrowed desktop window is
+  still `desktop`). "Should this be a fullscreen sheet?" is a `device` question.
+- **Header items shed by declared priority, not media queries** — give the slot `data-pc-fit="hide"`
+  + `data-pc-fit-priority`; the fit engine measures the real row.
+- **Script order matters.** The `pure-css/*.js` tags come first; keen-docs' inline `layout_js` and
+  `settings-panel.js` follow, so `window.pureCss` is installed before they run. The one script that
+  must precede everything is the pre-paint `pref_init_js` in `<head>` — it beats the first paint, so
+  it is the *only* sanctioned place to read `localStorage` / `matchMedia` directly.
+- **No new inline `<script>` strings in View** beyond what is already there; new behaviour goes in
+  `priv/web/keendocs/*.js`.
+- `priv/web/vendor/pure-css/*` is **vendored, not authored** — change `../pure-css` and re-vendor.
+
 ## Conventions
 
 - **Elixir 1.20 / OTP 29** (installed via Homebrew; `mix.exs` still declares `~> 1.15`). Idiomatic
