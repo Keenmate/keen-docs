@@ -80,7 +80,7 @@ body {
   font-family: var(--base-font-family);
   font-size: 1.6rem;
   color: var(--pc-text-color-1);
-  background-color: var(--pc-main-bg);
+  background-color: var(--pc-page-bg);
   line-height: 1.5;
 }
 

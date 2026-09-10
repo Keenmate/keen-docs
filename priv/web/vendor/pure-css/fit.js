@@ -613,8 +613,10 @@
     moreLink.className = 'pc-navmenu__link';
     moreLink.setAttribute('aria-haspopup', 'true');
     moreLink.setAttribute('aria-expanded', 'false');
+    // Empty span — the glyph is painted by CSS (--base-icon-chevron mask). No
+    // text char (the old "›" rendered inconsistently and would double up on the mask).
     moreLink.innerHTML = navEscapeHtml(moreLabel) +
-      ' <span class="pc-navmenu__more-chevron" aria-hidden="true">›</span>';
+      ' <span class="pc-navmenu__more-chevron" aria-hidden="true"></span>';
     moreLi.appendChild(moreLink);
     ul.appendChild(moreLi);
     moreLi.style.display = 'none';
@@ -736,8 +738,9 @@
       btn.type = 'button';
       btn.className = 'pc-sidebar__toggle';
       btn.setAttribute('aria-expanded', active ? 'true' : 'false');
+      // Empty chevron span — glyph painted by CSS (--base-icon-chevron mask).
       btn.innerHTML = iconHtml(icon) + labelHtml(text) +
-        '<span class="pc-sidebar__chevron" aria-hidden="true">›</span>';
+        '<span class="pc-sidebar__chevron" aria-hidden="true"></span>';
       li.appendChild(btn);
       var submenu = document.createElement('ul');
       submenu.className = 'pc-sidebar__submenu' + (active ? ' pc-sidebar__submenu--open' : '');
