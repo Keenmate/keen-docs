@@ -3,45 +3,50 @@
  * keen-docs is a @keenmate/pure-css-only consumer — it has NO pure-admin dependency. The handful of
  * UI widgets it borrowed from pure-admin (buttons, checkbox, tabs, the profile + settings panels)
  * are re-authored here as keen-docs-owned `kd-*` copies, deliberately LEAN — only the variants
- * keen-docs actually renders — and styled entirely on pure-css base tokens (--pc-*/--base-*, with
+ * keen-docs actually renders — and styled entirely on pure-css base tokens (--pc-* / --base-*, with
  * concrete fallbacks) so they follow the active theme and dark mode. Free to diverge from pure-admin
  * as keen-docs' needs evolve. Authored in the 10px-rem convention (see reboot.css).
+ *
+ * CAUTION: never let a star-slash pair appear inside these comments -- it CLOSES the comment.
+ * Writing
+ * that pair here once terminated this header early, and the prose that followed was
+ * parsed as a selector that swallowed the whole :root token block below (all 26 button
+ * tokens were silently dead in the browser). Use `--pc-* and .pc-*` instead.
  *
  * NOTE: `.kd-badge` is already defined by the harness (View.harness_css) — reused, not redefined.
  */
 
 /* ---- buttons ----
- * Copied VERBATIM from @keenmate/pure-admin core (compiled `.pa-btn`), renaming only `pa-btn`→`kd-btn`.
- * The `--pc-btn-*` component tokens are pure-admin's contract too (pure-css doesn't emit them), copied
- * as-is; they resolve against the --pc-* base tokens pure-css DOES emit (--pc-accent / --pc-danger /
- * --pc-main-bg / --pc-text-color-1 / --pc-border-color). Don't hand-tune — re-copy from pure-admin. */
+ * `.kd-btn` is keen-docs' copy of pure-admin core's `.pa-btn`, renamed pa-btn -> kd-btn.
+ *
+ * Tokens live in keen-docs' OWN `--kd-btn-*` namespace. They are NOT `--pc-btn-*` any more: the
+ * ecosystem split custom-property prefixes to match class prefixes (--pc-* and .pc-* = pure-css
+ * foundation + shell, --pa-* and .pa-* = pure-admin components, pure-admin 3.0.0), so `--pc-btn-*` sat
+ * in a namespace pure-css does not own and `--pa-btn-*` would squat pure-admin's. keen-docs renders
+ * `.kd-btn`, so it owns `--kd-btn-*`.
+ *
+ * VALUES are copied from @keenmate/pure-admin-core 3.0.0's compiled `--pa-btn-*`, which routes every
+ * component colour through `--base-*` at runtime -- that is what makes these follow the active theme
+ * and dark mode. Don't hand-tune: re-copy from pure-admin-core and re-prefix.
+ *
+ * Pruned to the four variants keen-docs actually renders (primary / secondary / outline-secondary /
+ * danger). The previous block defined 26 tokens for success/warning/info/light/dark variants that
+ * have no rule here, carrying a stale Bootstrap palette (#007bff, #6c757d) and compiled Sass
+ * artefacts (rgb(51, 149.4, 255)) that followed no theme.
+ *
+ * ONE deliberate divergence from 3.0.0: secondary-bg/-text are still literals upstream; here they
+ * read --base-secondary-color / --base-text-on-secondary, which pure-css 1.0.1 emits at the SAME
+ * values (#6c757d / #fff), so rendered output is identical but a theme can now retune them. */
 :root {
-  --pc-btn-primary-bg: #007bff;
-  --pc-btn-primary-bg-hover: rgb(51, 149.4, 255);
-  --pc-btn-primary-bg-light: color-mix(in srgb, var(--pc-btn-primary-bg) 5%, transparent);
-  --pc-btn-primary-text: #ffffff;
-  --pc-btn-secondary-bg: #6c757d;
-  --pc-btn-secondary-bg-hover: #545b62;
-  --pc-btn-secondary-text: #ffffff;
-  --pc-btn-secondary-outline-color: var(--pc-btn-secondary-bg);
-  --pc-btn-success-bg: var(--pc-success);
-  --pc-btn-success-bg-hover: rgb(26.4935064935, 153.5064935065, 73.2467532468);
-  --pc-btn-success-text: #ffffff;
-  --pc-btn-danger-bg: var(--pc-danger);
-  --pc-btn-danger-bg-hover: rgb(234.9802955665, 21.0197044335, 21.0197044335);
-  --pc-btn-danger-text: #ffffff;
-  --pc-btn-warning-bg: var(--pc-warning);
-  --pc-btn-warning-bg-hover: rgb(214.4769874477, 91.129707113, 5.5230125523);
-  --pc-btn-warning-text: #212529;
-  --pc-btn-info-bg: var(--pc-info);
-  --pc-btn-info-bg-hover: rgb(17.3333333333, 122.0869565217, 138.6666666667);
-  --pc-btn-info-text: #ffffff;
-  --pc-btn-light-bg: #f8f9fa;
-  --pc-btn-light-bg-hover: #e9ecef;
-  --pc-btn-light-text: #2c3e50;
-  --pc-btn-dark-bg: #343a40;
-  --pc-btn-dark-bg-hover: #1d2124;
-  --pc-btn-dark-text: #ffffff;
+  --kd-btn-primary-text: var(--base-text-color-on-accent, #ffffff);
+
+  --kd-btn-secondary-bg: var(--base-secondary-color, #6c757d);
+  --kd-btn-secondary-text: var(--base-text-on-secondary, #ffffff);
+  --kd-btn-secondary-outline-color: var(--kd-btn-secondary-bg);
+
+  --kd-btn-danger-bg: var(--pc-danger);
+  --kd-btn-danger-bg-hover: var(--base-danger-color-hover, #dc2626);
+  --kd-btn-danger-text: var(--base-text-on-danger, #ffffff);
 }
 .kd-btn {
   display: inline-flex;
@@ -65,7 +70,7 @@
 .kd-btn--primary {
   background-color: var(--pc-accent);
   border-color: var(--pc-accent);
-  color: var(--pc-btn-primary-text);
+  color: var(--kd-btn-primary-text);
 }
 .kd-btn--primary:hover {
   background-color: var(--pc-accent);
@@ -81,22 +86,22 @@
   border-color: var(--pc-accent);
 }
 .kd-btn--danger {
-  background-color: var(--pc-btn-danger-bg);
-  border-color: var(--pc-btn-danger-bg);
-  color: var(--pc-btn-danger-text);
+  background-color: var(--kd-btn-danger-bg);
+  border-color: var(--kd-btn-danger-bg);
+  color: var(--kd-btn-danger-text);
 }
 .kd-btn--danger:hover {
-  background-color: var(--pc-btn-danger-bg-hover);
-  border-color: var(--pc-btn-danger-bg-hover);
+  background-color: var(--kd-btn-danger-bg-hover);
+  border-color: var(--kd-btn-danger-bg-hover);
 }
 .kd-btn--outline-secondary {
   background-color: transparent;
-  border-color: var(--pc-btn-secondary-outline-color);
-  color: var(--pc-btn-secondary-outline-color);
+  border-color: var(--kd-btn-secondary-outline-color);
+  color: var(--kd-btn-secondary-outline-color);
 }
 .kd-btn--outline-secondary:hover {
-  background-color: var(--pc-btn-secondary-bg);
-  color: var(--pc-btn-secondary-text);
+  background-color: var(--kd-btn-secondary-bg);
+  color: var(--kd-btn-secondary-text);
 }
 .kd-btn:disabled {
   opacity: 0.65;

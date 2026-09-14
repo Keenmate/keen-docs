@@ -985,10 +985,20 @@ defmodule KeenDocs.Web.View do
     .pc-layout__footer a{color:var(--base-accent-color,#2563eb)} .kd-social{margin-inline-end:0.96rem}
     /* ---- rendered content ---- */
     .kd-card{background:var(--base-main-bg,#fff);border:1px solid var(--base-border-color,#e5e9f0);border-radius:10px;padding:1.6rem 1.92rem;margin:1.28rem 0}
-    .kd-badge{display:inline-block;font-size:1.152rem;padding:0.16rem 0.8rem;border-radius:999px;background:#e2e8f0;color:#334155;font-weight:600}
-    .kd-badge.component{background:#dbeafe;color:#1d4ed8} .kd-badge.infrastructure{background:#dcfce7;color:#15803d}
-    .kd-badge.guide{background:#fef9c3;color:#854d0e} .kd-badge.rc{background:#fee2e2;color:#b91c1c}
-    .kd-badge.default{background:#e0e7ff;color:#4338ca} .kd-badge.hidden{background:#f1f5f9;color:#64748b}
+    /* Badge kinds map onto the --base-* SEMANTIC ROLE tokens (tint + text), not the categorical
+       --base-color-1..9 slots. The roles are what dark-theme.css already overrides, so the pills
+       follow light/dark and any theme for free; the palette slots are not mode-aware. The literals
+       stay as var() fallbacks for a no-pure-css render. */
+    .kd-badge{display:inline-block;font-size:1.152rem;padding:0.16rem 0.8rem;border-radius:999px;background:var(--base-subtle-bg,#e2e8f0);color:var(--base-text-color-1,#334155);font-weight:600}
+    .kd-badge.component{background:var(--base-info-bg-light,#dbeafe);color:var(--base-info-text,#1d4ed8)}
+    .kd-badge.infrastructure{background:var(--base-success-bg-light,#dcfce7);color:var(--base-success-text,#15803d)}
+    .kd-badge.guide{background:var(--base-warning-bg-light,#fef9c3);color:var(--base-warning-text,#854d0e)}
+    .kd-badge.rc{background:var(--base-danger-bg-light,#fee2e2);color:var(--base-danger-text,#b91c1c)}
+    /* `default` has no status role left; it rides the brand accent. -color-active (not -color) is
+       the text tier: it is the dark end in light mode and dark-theme brightens it, so it stays
+       legible on the faint accent tint in BOTH modes. */
+    .kd-badge.default{background:var(--base-accent-color-light,#e0e7ff);color:var(--base-accent-color-active,#4338ca)}
+    .kd-badge.hidden{background:var(--base-subtle-bg,#f1f5f9);color:var(--base-text-color-2,#64748b)}
     table{border-collapse:collapse;width:100%} td,th{padding:0.72rem 0.96rem;text-align:left;border-bottom:1px solid var(--base-border-color,#eef1f6)}
     th{font-size:1.248rem;text-transform:uppercase;letter-spacing:.03em;color:var(--base-text-color-2,#64748b)}
     code{background:var(--base-subtle-bg,#eef1f6);padding:0.08rem 0.56rem;border-radius:4px;font-size:.9em}

@@ -60,4 +60,13 @@ html.pc-mode-dark {
   --base-warning-bg-light: rgba(249, 115, 22, 0.16);
   --base-danger-bg-light:  rgba(239, 68, 68, 0.16);
   --base-info-bg-light:    rgba(23, 162, 184, 0.16);
+
+  /* The matching TEXT tier for those tints. pure-css ships --base-*-text tuned for a LIGHT tint
+     (#155724 dark green and friends), which would be near-invisible on the dark tints above, so a
+     dark theme has to supply its own pair. Light 400-weight hues, legible at ~7:1 on the 0.16
+     tints. Anything reading tint + text together (kd-badge pills, callouts) follows automatically. */
+  --base-success-text: #4ade80;
+  --base-warning-text: #fbbf24;
+  --base-danger-text:  #f87171;
+  --base-info-text:    #22d3ee;
 }
