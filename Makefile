@@ -4,7 +4,7 @@
 DBGEN := $(if $(findstring Windows_NT,$(OS)),./db-gen-win.exe,./db-gen-linux)
 
 # Pinned @keenmate/pure-css release the vendored CSS+JS tracks. Bump + `make vendor-css` to update.
-PURE_CSS_VERSION := 1.0.0-rc08
+PURE_CSS_VERSION := 1.0.1
 
 # The Bandit HTTP port (keep in sync with config :keen_docs, KeenDocs.Web, port:).
 PORT := 4000
