@@ -53,13 +53,6 @@ defmodule KeenDocs.Web.Router do
     send_js(conn, Path.join(["keendocs", file]))
   end
 
-  # ── presentation templates (priv/templates/<id>/dist/<id>.css) ────────────
-  # Legacy template stylesheets (the `calm` skin). Superseded by theme bundles above; kept until
-  # calm is re-based (themes Phase 5). Declared before the greedy /:set/... routes.
-  get "/templates/:id/dist/:file" do
-    send_template_css(conn, id, file)
-  end
-
   # ── hub ───────────────────────────────────────────────────────────────────
   # The hub renders its authored homepage (the 'hub' site's home_slug page); if none is set,
   # it falls back to the auto-generated doc_set table.
@@ -508,22 +501,6 @@ defmodule KeenDocs.Web.Router do
     end
   end
 
-
-  # Serve a template stylesheet from priv/templates/<id>/dist/<file>. Both segments are
-  # validated to a safe charset (no dots/slashes) so neither can escape the templates dir.
-  defp send_template_css(conn, id, file) do
-    if id =~ ~r/^[a-z][a-z0-9-]*$/ and file =~ ~r/^[a-z][a-z0-9.-]*\.css$/ do
-      path = Path.join([File.cwd!(), "priv", "templates", id, "dist", file])
-
-      if File.exists?(path) do
-        conn |> put_resp_content_type("text/css") |> send_resp(200, File.read!(path))
-      else
-        send_resp(conn, 404, "missing template asset: #{id}/#{file}")
-      end
-    else
-      send_resp(conn, 400, "bad template asset path")
-    end
-  end
 
   defp not_found(conn) do
     send_resp(put_resp_content_type(conn, "text/html"), 404, View.layout("Not found", "<h1>404</h1><p>Nothing here.</p>"))

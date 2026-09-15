@@ -166,8 +166,8 @@ a native keen-docs theme would put it in its own `theme.json`.
 - [x] **Naming decision**: the bundle selector moved from `:template`/`settings["template"]` to
       **`config :keen_docs, :theme` + `settings["theme"]["id"]`** (pure-admin nomenclature). It sits in
       the SAME `settings["theme"]` map as the existing per-doc_set `accent`/`vars` micro-override — so
-      `id` picks the base bundle and `accent`/`vars` fine-tune it. (Legacy `priv/templates` route + the
-      `calm` skin are dormant, retired in Phase 5.)
+      `id` picks the base bundle and `accent`/`vars` fine-tune it. (The legacy `priv/templates` route
+      and the `calm` skin were retired — see below.)
 - [x] **Modes** already work theme-agnostically — bundles scope dark as a bare `.pc-mode-dark`, which
       keen-docs' existing `<html>` toggle (`mode_init_js` + `mode_toggle_html`) drives; no html-vs-body
       reconcile needed. **Variant**: default `pa-color-*` class is server-rendered on `<html>` from
@@ -196,9 +196,15 @@ a native keen-docs theme would put it in its own `theme.json`.
 ### Phase 5 — cleanup
 - [ ] Remove the superseded hand-extracted `layout.css` / `profile-panel.css` once `core.css` +
       theme bundles cover them.
-- [ ] Re-base `calm` from a bespoke skin into a proper theme (`theme.json` + scss + render block), or
-      retire it in favour of a copied pure-admin theme.
-- [ ] Update `priv/templates/README.md` and DESIGN.md to the final model.
+- [x] **`calm` retired.** Removed `priv/templates/` (the `calm` skin, its manifest and preview) plus
+      the `/templates/:id/dist/:file` route and `send_template_css/3`. It was linked by no rendered
+      page — `View` never emitted it — and its whole category is gone: `KeenDocs.Themes` ships a
+      declarative render contract, not CSS bundles. It had also drifted badly off the `--base-*`
+      contract (85 property-level colour literals; only 13 of its 34 `--calm-*` tokens derived from
+      `--base-*`, so the "gradient re-tints per doc_set" claim held for one of four stops).
+      The class inventory from `priv/templates/README.md` survives as
+      [`docs/markup-contract.md`](./markup-contract.md).
+- [ ] Update DESIGN.md to the final model.
 
 ## Open questions
 - Manifest name/location: `keendocs.json` at repo root + `themesDir: priv/web/vendor/themes`? (leaning yes)
